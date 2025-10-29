@@ -1,87 +1,104 @@
 # 🧠 Deep Learning Project – Garbage Classification
 
 This project was developed as part of the **Deep Learning for AI** course.  
-It explores how **Convolutional Neural Networks (CNNs)** can be used for **image recognition and classification** on environmental datasets.
+It explores how **Convolutional Neural Networks (CNNs)** can classify environmental waste images.
 
 ---
 
 ## ♻️ 1. Garbage Classification
 
-### 📦 The Dataset
-The dataset ([Garbage Classification](https://www.kaggle.com/asdasdasasdas/garbage-classification)) contains **15,527 images** divided into **12 categories** of household waste:
-`paper`, `cardboard`, `biological`, `metal`, `plastic`, `green-glass`, `brown-glass`, `white-glass`, `clothes`, `shoes`, `battery`, `trash`.
-
-- **Training set:** 420 images per class (≈70%)  
-- **Validation/Test set:** 90 images per class (≈15%)  
-- **Resized images:** 224×224 pixels  
-
----
-
-### 🧩 Model
-Architecture used: **AlexNet**  
-- 5 convolutional layers  
-- 3 max pooling layers  
-- 2 fully connected hidden layers (4096 neurons each)  
-- 1 fully connected output layer (1000 neurons)  
-
-**Input:** RGB images of size 224×224×3.
-
----
-
-### 📊 Results
-- Initial accuracy: ~16.7%  
-- Accuracy after 10 epochs: **≈60%**  
-- Early stopping applied at epoch 10 to avoid **overfitting**.  
-- Best classification performance achieved for **Green-glass** (85/90 correct).  
-- **Plastic** was the most challenging category.  
-
-**Confusion matrix analysis** showed generally correct class assignments, with varying precision between categories.
-
----
-
-## 🔥 2. Fire Detection with Image Recognition
-
 ### 📦 Dataset
-Two classes:  
-- **Fire Images (755)**  
-- **Non-Fire Images (244)**  
+The dataset ([Garbage Classification – Kaggle](https://www.kaggle.com/asdasdasasdas/garbage-classification)) includes **15,527 images** divided into **12 categories**:
 
-- **Balanced training set:** 60 images per class  
-- **Validation/Test:** 92 images per class  
-- **Resized to 224×224 pixels**
+`paper`, `cardboard`, `biological`, `metal`, `plastic`,  
+`green-glass`, `brown-glass`, `white-glass`, `clothes`,  
+`shoes`, `battery`, `trash`.
 
-**Data augmentation:**  
-`RandomHorizontalFlip`, `ColorJitter`, and `Normalization` applied to improve generalization.
+To handle imbalance, the dataset was **rebalanced** through downsampling:  
+→ **600 images per class** were selected and organized into:
 
----
+- **Training set:** 420 images/class (≈70%)  
+- **Validation set:** 90 images/class (≈15%)  
+- **Test set:** 90 images/class (≈15%)
 
-### 🧩 Model and Results
-Architecture: **AlexNet**  
-- Accuracy stabilized around **75–76%** after training.  
-- Validation and training loss decreased consistently.  
-- Some overfitting signs detected but mitigated through early stopping.
-
-**Confusion Matrix Analysis:**  
-- **Non-Fire class:** Precision 0.68, Recall 1.00  
-- **Fire class:** Precision 1.00, Recall 0.52  
+All images were resized to **224×224 pixels**.
 
 ---
 
-## 🧠 Conclusions
+### 🧩 Data Augmentation
+Applied transformations to improve model generalization:
 
-| Dataset | Final Accuracy | Key Notes |
-|----------|----------------|-----------|
-| Garbage | ~60% | Overfitting controlled via early stopping. Plastic class remains challenging. |
-| Fire | ~76% | Stronger generalization thanks to data augmentation, but fire detection precision still limited. |
+- `RandomHorizontalFlip(p=1)`  
+- `RandomResizedCrop((224,224), scale=(0.1,0.7))`  
+- `RandomRotation(45°)`  
+- `ColorJitter(brightness=0.25)`  
+- `RandomAdjustSharpness(sharpness_factor=2)`
 
-**Takeaways:**
-- Deep learning can effectively classify complex visual data even with limited training size.  
-- Regularization and augmentation are essential to avoid overfitting.  
-- Further improvements could be achieved with transfer learning (e.g., ResNet, EfficientNet).
+Augmentation was applied 4× to the training set before merging with the original images.
 
 ---
 
-### 🚀 How to run
+## 🏗️ Architectures
+
+### 🔹 AlexNet
+- 5 convolutional layers (ReLU activations)  
+- 3 max pooling layers  
+- 2 fully connected layers (4096 neurons each)  
+- 1 output layer (12 neurons)  
+- Dropout regularization to reduce overfitting  
+
+**Input:** RGB images (224×224×3)
+
+**Results:**
+
+| Metric | Value |
+|--------|--------|
+| Training Accuracy | 70.6% |
+| Validation Accuracy | 65.6% |
+| Test Accuracy | 64.4% |
+
+**Observations:**  
+- Model struggled with **metal**, **plastic**, and **shoes** classes.  
+- Precision lower for metal; recall lowest for plastic.
+
+---
+
+### 🔹 GoogLeNet
+- 7×7 Conv + BatchNorm + MaxPool  
+- 1×1 and 3×3 Conv layers  
+- 9 **Inception blocks**  
+- Dropout + Dense Layer + LogSoftmax  
+
+**Results:**
+
+| Metric | Value |
+|--------|--------|
+| Training Accuracy | 76.7% |
+| Validation Accuracy | 73.6% |
+| Test Accuracy | 72.8% |
+
+**Observations:**  
+- Improved generalization and accuracy compared to AlexNet.  
+- Most errors involved confusion between *metal*, *paper*, and *white-glass*.  
+- *Green-glass* achieved precision of 79%, while *shoes* remained the hardest (precision 51%).
+
+---
+
+## 🧠 Final Comparison
+
+| Model | Test Accuracy | Notes |
+|--------|----------------|--------|
+| **AlexNet** | 64.4% | Struggled with specific material classes |
+| **GoogLeNet** | 72.8% | Better precision and generalization |
+
+**Conclusion:**  
+> GoogLeNet outperformed AlexNet across all metrics, thanks to its deeper Inception architecture and improved regularization mechanisms.
+
+---
+
+## 🚀 How to Run
 You can open and execute the notebook directly in Google Colab:
 
 [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/fabianapagliuca/Deep-Learning/blob/main/Garbage_Classification.ipynb)
+
+---
